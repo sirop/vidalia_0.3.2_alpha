@@ -114,9 +114,16 @@ private slots:
   /** Adds routers to the RouterListWidget after they have been loaded
    *  in the internal _router list */
   void loadNetworkStatus();
-
+ 
   /** Called when the user clicks on a QLabel containing a hyperlink. */
   void linkActivated(const QString &url);
+
+  /** Show/Hide IP Column if chkShowIP is clicked. */
+  void on_chkShowIP_clicked(bool checked);
+  /** Show/Hide Bandwidth Column if chkShowBW is clicked. */
+  void on_chkShowBW_clicked(bool checked);
+  /** Show/Hide Uptime Column if chkShowUptime is clicked. */
+  void on_chkShowUptime_clicked(bool checked);
 
 private:
   /** */

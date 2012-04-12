@@ -19,6 +19,7 @@
 #include "Vidalia.h"
 #include "VMessageBox.h"
 #include "ServerSettings.h"
+#include "VSettings.h"
 
 #include <QMessageBox>
 #include <QToolBar>
@@ -40,7 +41,7 @@
 #endif
 
 /* Settings key for main layout splitter state */
-#define SETTING_SPLITTER_MAIN 	"NetViewSplitMain"
+#define SETTING_SPLITTER_MAIN   "NetViewSplitMain"
 /* Key for network map splitter */
 #define SETTING_SPLITTER_MAP    "NetViewSplitMap"
 /* Key for router description splitter */
@@ -50,6 +51,20 @@
 #define DEFAULT_SPLITTER_MAIN   QByteArray()
 #define DEFAULT_SPLITTER_MAP    QByteArray()
 #define DEFAULT_SPLITTER_ROUT   QByteArray()
+
+/* Settings key for IP column */
+#define SETTING_IP_COLUMN  "ShowIPColumn"
+/* Settings key for Bandwidth column */
+#define SETTING_BW_COLUMN  "ShowBandwidthColumn"
+/* Settings key for Uptime column */
+#define SETTING_UPTIME_COLUMN  "ShowUptimeColumn"
+
+/* Default key value for IP column */
+#define DEFAULT_IP_COLUMN  false
+/* Default key value for Bandwidth column */
+#define DEFAULT_BW_COLUMN  false
+/* Default key value for Uptime column */
+#define DEFAULT_UPTIME_COLUMN  false
 
 /** Constructor. Loads settings from VidaliaSettings.
  * \param parent The parent widget of this NetViewer object.\
@@ -115,6 +130,23 @@ NetViewer::NetViewer(QWidget *parent)
   ui.treeHSCircuitList->header()->
     resizeSection(CircuitListWidget::ConnectionColumn, 235);
 
+  /* Add optional columns to Relay Panel if their setting values are true,
+   * otherwise use default values. */
+  VSettings *settings=new VSettings("Relay_Panel");
+  ui.treeRouterList->setColumnHidden(RouterListWidget::IPnumberColumn,
+  !(settings->value(SETTING_IP_COLUMN, DEFAULT_IP_COLUMN).toBool()));
+  ui.chkShowIP->setChecked(settings->value(SETTING_IP_COLUMN,
+                            DEFAULT_IP_COLUMN).toBool());
+  ui.treeRouterList->setColumnHidden(RouterListWidget::BandwidthColumn,
+  !(settings->value(SETTING_BW_COLUMN, DEFAULT_BW_COLUMN)).toBool());
+  ui.chkShowBW->setChecked((settings->value(SETTING_BW_COLUMN,
+                            DEFAULT_BW_COLUMN)).toBool());
+  ui.treeRouterList->setColumnHidden(RouterListWidget::UptimeColumn,
+  !(settings->value(SETTING_UPTIME_COLUMN, DEFAULT_UPTIME_COLUMN)).toBool());
+  ui.chkShowUptime->setChecked((settings->value(SETTING_UPTIME_COLUMN,
+                                DEFAULT_UPTIME_COLUMN)).toBool());
+  delete settings;
+
   /* Create the TorMapWidget and add it to the dialog */
 #if defined(USE_MARBLE)
   _map = new TorMapWidget();
@@ -144,9 +176,15 @@ NetViewer::NetViewer(QWidget *parent)
   connect(ui.actionHelp, SIGNAL(triggered()), this, SLOT(help()));
   connect(ui.actionRefresh, SIGNAL(triggered()), this, SLOT(refresh()));
   connect(ui.treeRouterList, SIGNAL(routerSelected(QList<RouterDescriptor>)),
-	        this, SLOT(routerSelected(QList<RouterDescriptor>)));
+          this, SLOT(routerSelected(QList<RouterDescriptor>)));
   connect(ui.treeRouterList, SIGNAL(zoomToRouter(QString)),
           _map, SLOT(zoomToRouter(QString)));
+  connect(ui.chkShowIP, SIGNAL(clicked(bool)),
+          this, SLOT(on_chkShowIP_clicked(bool)));
+  connect(ui.chkShowBW, SIGNAL(clicked(bool)),
+          this, SLOT(on_chkShowBW_clicked(bool)));
+  connect(ui.chkShowUptime, SIGNAL(clicked(bool)),
+          this, SLOT(on_chkShowUptime_clicked(bool)));
   connect(ui.treeCircuitList, SIGNAL(circuitSelected(Circuit)),
           this, SLOT(circuitSelected(Circuit)));
   connect(ui.treeCircuitList, SIGNAL(circuitRemoved(CircuitId)),
@@ -174,7 +212,7 @@ NetViewer::NetViewer(QWidget *parent)
 
   tb->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
   ui.horizontalLayout->addWidget(tb);
-  
+
   /* Restore the state of each splitter */
   ui.spltMain->restoreState(getSetting(SETTING_SPLITTER_MAIN,
                                        DEFAULT_SPLITTER_MAIN)
@@ -608,4 +646,34 @@ void
 NetViewer::linkActivated(const QString &url)
 {
   emit helpRequested(url);
+}
+
+/** Show/Hide IP Column if chkShowIP is clicked. */
+void
+NetViewer::on_chkShowIP_clicked(bool checked)
+{
+  VSettings *settings=new VSettings("Relay_Panel");
+  ui.treeRouterList->setColumnHidden(RouterListWidget::IPnumberColumn, !checked);
+  settings->setValue(SETTING_IP_COLUMN, checked);
+  delete settings;
+}
+
+/** Show/Hide Bandwidth Column if chkShowBW is clicked. */
+void
+NetViewer::on_chkShowBW_clicked(bool checked)
+{
+  VSettings *settings=new VSettings("Relay_Panel");
+  ui.treeRouterList->setColumnHidden(RouterListWidget::BandwidthColumn, !checked);
+  settings->setValue(SETTING_BW_COLUMN, checked);
+  delete settings;
+}
+
+/** Show/Hide Uptime Column if chkShowUptime is clicked. */
+void
+NetViewer::on_chkShowUptime_clicked(bool checked)
+{
+  VSettings *settings=new VSettings("Relay_Panel");
+  ui.treeRouterList->setColumnHidden(RouterListWidget::UptimeColumn, !checked);
+  settings->setValue(SETTING_UPTIME_COLUMN, checked);
+  delete settings;
 }

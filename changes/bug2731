@@ -1,0 +1,3 @@
+New features:
+o Add optional columns IP, Bandwidth and Uptime to Relay Panel.
+  Resolves ticket 2731.
