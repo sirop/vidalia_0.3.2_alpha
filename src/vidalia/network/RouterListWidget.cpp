@@ -23,14 +23,16 @@
 #define IMG_ZOOM   ":/images/22x22/page-zoom.png"
 #define IMG_COPY   ":/images/22x22/edit-copy.png"
 
-
 RouterListWidget::RouterListWidget(QWidget *parent)
   : QTreeWidget(parent)
 {
   /* Create and initialize columns */
   setHeaderLabels(QStringList() << QString("")
                                 << QString("")
-                                << tr("Relay"));
+                                << tr("Relay")
+                                << tr("IP")
+                                << tr("Bandwidth")
+                                << tr("Uptime"));
 
   /* Sort by descending server bandwidth */
   sortItems(StatusColumn, Qt::DescendingOrder);
@@ -46,7 +48,10 @@ RouterListWidget::retranslateUi()
 {
   setHeaderLabels(QStringList() << QString("")
                                 << QString("")
-                                << tr("Relay"));
+                                << tr("Relay")
+                                << tr("IP")
+                                << tr("Bandwidth")
+                                << tr("Uptime"));
 }
 
 /** Called when the user requests a context menu for a router in the list. A
